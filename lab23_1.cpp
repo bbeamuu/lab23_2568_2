@@ -3,6 +3,8 @@
 #include<vector>
 #include<string>
 #include<cstdlib>
+#include <cctype>
+#include <sstream>
 
 using namespace std;
 
@@ -20,22 +22,94 @@ string toUpperStr(string x){
     return y;
 }
 
-void importDataFromFile(){
-
+string trim(string s){
+    while(!s.empty() && isspace(s.front())) s.erase(0,1);
+    while(!s.empty() && isspace(s.back())) s.pop_back();
+    return s;
 }
 
-void getCommand(){
+void importDataFromFile(string filename, vector<string>& names, vector<int>& scores, vector<char>& grades){
+    ifstream file(filename);
+    string line;
 
+    while(getline(file,line)){
+        string name;
+        int s1,s2,s3;
+
+        size_t pos = line.find(':');
+        name = line.substr(0,pos);
+
+        string scorePart = line.substr(pos+1);
+        stringstream ss(scorePart);
+
+        ss >> s1 >> s2 >> s3;
+
+        int total = s1 + s2 + s3;
+
+        names.push_back(name);
+        scores.push_back(total);
+        grades.push_back(score2grade(total));
+    }
 }
 
-void searchName(){
+void getCommand(string& command, string& key){
+    cout << "Please input your command:\n";
+    string input;
 
+    getline(cin,input);
+
+    stringstream ss(input);
+    ss >> command;
+    getline(ss,key);
+
+    if(key.size()>0 && key[0]==' ') key.erase(0,1);
 }
 
-void searchGrade(){
 
+void searchName(const vector<string>& names,
+                const vector<int>& scores,
+                const vector<char>& grades,
+                const string& key)
+{
+    for(size_t i = 0; i < names.size(); i++){
+
+        if(toUpperStr(names[i]) == key){
+
+            cout << "---------------------------------\n";
+            cout << names[i] << "'s score = " << scores[i] << "\n";
+            cout << names[i] << "'s grade = " << grades[i] << "\n";
+            cout << "---------------------------------\n";
+            return;
+        }
+    }
+
+    cout << "---------------------------------\n";
+    cout << "Cannot found.\n";
+    cout << "---------------------------------\n";
 }
 
+void searchGrade(const vector<string>& names,
+                 const vector<int>& scores,
+                 const vector<char>& grades,
+                 const string& key)
+{
+    bool found = false;
+
+    cout << "---------------------------------\n";
+
+    for(size_t i = 0; i < grades.size(); i++){
+        if(grades[i] == key[0]){
+            cout << names[i] << " (" << scores[i] << ")\n";
+            found = true;
+        }
+    }
+
+    if(!found){
+        cout << "Cannot found.\n";
+    }
+
+    cout << "---------------------------------\n";
+}
 
 int main(){
     string filename = "name_score.txt";
